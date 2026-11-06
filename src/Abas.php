@@ -464,10 +464,12 @@ class Abas extends CommonGLPI
         $estimated = (int) $ev->fields['audience'];
         echo "<div class='ge ge-tab'>" . self::banner($ev, 'producao');
         echo "<div class='row g-3 mb-3'>" . Aprovacao::tile('Público estimado', (string) $estimated, '#3b82f6') . Aprovacao::tile('Convidados', (string) $inv, '#8b5cf6')
-            . Aprovacao::tile('Confirmados', "$conf" . ($inv ? ' (' . round(100 * $conf / $inv) . '%)' : ''), '#22c55e') . Aprovacao::tile('Presentes', (string) $pres, '#14b8a6') . "</div>";
+            . Aprovacao::tile('Confirmados', "$conf" . ($inv ? ' (' . round(100 * $conf / $inv) . '%)' : ''), '#22c55e') . Aprovacao::tile('Presentes', (string) $pres, '#14b8a6') . Aprovacao::tile('Leads captados', (string) Registro::countKind($id, 'lead_contato'), '#f59e0b') . "</div>";
         echo self::galeriaBrindes($ev);
         echo "<div class='row g-3 mb-3'>" . Registro::block($ev, 'peca', $edit, $back, 'col-xl-6') . Registro::block($ev, 'brinde', $edit, $back, 'col-xl-6') . "</div>";
         echo "<div class='row g-3 mb-3'>" . Registro::block($ev, 'patrocinador', $edit, $back, 'col-xl-6') . Registro::block($ev, 'programacao', $edit, $back, 'col-xl-6') . "</div>";
+        echo Leads::card($ev, $edit);
+        echo "<div class='row g-3 mb-3'>" . Registro::block($ev, 'lead_contato', $edit, $back, 'col-12') . "</div>";
         echo $edit ? Importacao::card($ev) : '';
         echo "<div class='row g-3'>" . Registro::block($ev, 'convidado', $edit, $back, 'col-xl-6') . Registro::block($ev, 'kpi', $edit, $back, 'col-xl-6') . "</div>";
         echo "<div class='small text-secondary mt-2'>Aprovar peças e brindes é do Marketing; o Comercial acompanha e contribui. Os patrocínios entram como receita no Financeiro (o realizado só conta quando o recebimento é confirmado).</div></div>";

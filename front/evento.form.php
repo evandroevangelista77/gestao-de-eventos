@@ -11,6 +11,7 @@ use GlpiPlugin\Gestaoeventos\Fase;
 use GlpiPlugin\Gestaoeventos\Financeiro;
 use GlpiPlugin\Gestaoeventos\Historico;
 use GlpiPlugin\Gestaoeventos\Importacao;
+use GlpiPlugin\Gestaoeventos\Leads;
 use GlpiPlugin\Gestaoeventos\Menu;
 use GlpiPlugin\Gestaoeventos\Registro;
 use GlpiPlugin\Gestaoeventos\Viagem;
@@ -139,6 +140,11 @@ try {
     } elseif (isset($_POST['close_action'])) {
         $load();
         Session::addMessageAfterRedirect(htmlspecialchars(Encerramento::action($evento, (string) $_POST['close_action'])));
+        $back();
+    } elseif (isset($_POST['enviar_leads_crm'])) {
+        $load();
+        $need('marketing');
+        Session::addMessageAfterRedirect(htmlspecialchars(Leads::sendToCrm($evento)));
         $back();
     } elseif (isset($_POST['import_convidados'])) {
         $load();

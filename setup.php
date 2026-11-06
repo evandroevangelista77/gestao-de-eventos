@@ -15,7 +15,7 @@ use GlpiPlugin\Gestaoeventos\Evento;
 use GlpiPlugin\Gestaoeventos\Menu;
 use GlpiPlugin\Gestaoeventos\ProfileTab;
 
-define('PLUGIN_GESTAOEVENTOS_VERSION', '1.2.0');
+define('PLUGIN_GESTAOEVENTOS_VERSION', '1.3.0');
 define('PLUGIN_GESTAOEVENTOS_MIN_GLPI', '11.0.0');
 define('PLUGIN_GESTAOEVENTOS_MAX_GLPI', '12.0.99');
 

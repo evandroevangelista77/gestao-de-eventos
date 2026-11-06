@@ -28,7 +28,7 @@ class Registro
     public const PROB = ['baixa' => 'Baixa', 'media' => 'Média', 'alta' => 'Alta'];
 
     /** status → cor do selo */
-    private const GOOD = ['feito', 'concluido', 'aprovada', 'aprovado', 'publicada', 'assinado', 'recebido', 'pago', 'resolvida', 'atingido', 'conciliado', 'realizado', 'entregue', 'presente', 'confirmado', 'emitido', 'escolhida', 'encerrado', 'reservado', 'medido', 'baixa', 'na'];
+    private const GOOD = ['feito', 'concluido', 'aprovada', 'aprovado', 'publicada', 'assinado', 'recebido', 'pago', 'resolvida', 'atingido', 'conciliado', 'realizado', 'entregue', 'presente', 'confirmado', 'enviado_crm', 'emitido', 'escolhida', 'encerrado', 'reservado', 'medido', 'baixa', 'na'];
     private const BAD = ['bloqueado', 'rejeitada', 'rejeitado', 'divergente', 'nao_atingido', 'cancelado', 'ocorreu', 'critica', 'vencido', 'recusado', 'devolvido', 'ausente', 'descartada', 'alta'];
     private const WARN = ['em_aprovacao', 'aprovacao', 'pendente', 'aberta', 'solicitado', 'juridico', 'andamento', 'rascunho', 'parcial', 'mitigando', 'media', 'followup', 'negociacao', 'cotacao', 'comprometido', 'a_reservar', 'a_enviar', 'enviado'];
 
@@ -69,6 +69,11 @@ class Registro
         'convidado' => ['Convidados e participantes', 'ti-users', 'marketing', 'execucao', [
             'title' => ['Nome', 'text', '', 1], 'supplier' => ['Empresa', 'text', '', 1], 'category' => ['Perfil', 'select', ['cliente' => 'Cliente', 'prospect' => 'Prospect', 'parceiro' => 'Parceiro', 'interno' => 'Interno', 'palestrante' => 'Palestrante'], 1],
             'status' => ['Situação', 'select', ['convidado' => 'Convidado', 'confirmado' => 'Confirmado', 'recusado' => 'Recusado', 'presente' => 'Presente', 'ausente' => 'Ausente'], 1]], []],
+        'lead_contato' => ['Leads captados', 'ti-user-star', 'marketing', 'execucao', [
+            'title' => ['Nome', 'text', '', 1], 'supplier' => ['Empresa', 'text', '', 1], 'cc' => ['Cargo', 'text', '', 0], 'doc_ref' => ['E-mail', 'text', '', 1], 'code' => ['Telefone', 'text', '', 1],
+            'category' => ['Interesse', 'select', ['seguranca' => 'Segurança', 'cloud' => 'Cloud', 'infra' => 'Infraestrutura / Data Center', 'software' => 'Software e licenças', 'servicos' => 'Serviços gerenciados', 'redes' => 'Redes e Wi-Fi', 'outro' => 'Outro'], 1],
+            'subcategory' => ['Temperatura', 'select', ['quente' => 'Quente', 'morno' => 'Morno', 'frio' => 'Frio'], 1],
+            'status' => ['Situação', 'select', ['novo' => 'Novo', 'enviado_crm' => 'Enviado ao CRM'], 1], 'detail' => ['Observações do contato', 'textarea', '', 0]], []],
         'brinde' => ['Brindes e materiais', 'ti-gift', 'marketing', 'producao', [
             'doc_ref' => ['Foto', 'image', '', 1], 'title' => ['Item', 'text', '', 1], 'qty' => ['Qtd.', 'number', '', 1], 'unit' => ['Unid.', 'text', '', 0], 'amount_budget' => ['Valor estimado (R$)', 'money', '', 1], 'supplier' => ['Fornecedor', 'text', '', 1],
             'date_due' => ['Prazo', 'date', '', 1], 'status' => ['Situação', 'select', ['a_definir' => 'A definir', 'arte' => 'Arte', 'producao' => 'Em produção', 'recebido' => 'Recebido', 'entregue' => 'Entregue'], 1]], ['totals' => ['amount_budget'], 'marketing_status' => 'arte']],
