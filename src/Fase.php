@@ -587,6 +587,116 @@ class Fase
         }
     }
 
+    // ------------------------------------------------------------------ resumo da etapa (pop-up ao passar o mouse)
+
+    /**
+     * O que acontece em cada etapa, para o pop-up do passo a passo: o que já foi feito, o que está em
+     * execução e o que ainda está pendente. Usa só dados já cadastrados no evento.
+     */
+    public static function summary(Evento $ev, array $p, array $phases): string
+    {
+        $e = [Menu::class, 'e'];
+        $id = $ev->getID();
+        $code = (string) $p['code'];
+        $status = (string) $p['status'];
+        [$label, $color] = self::STATUSES[$status] ?? ['', '#64748b'];
+        $late = self::isLate($p) && $status === 'active';
+        if ($late) {
+            [$label, $color] = ['Atrasada', '#ef4444'];
+        }
+        $slo = (int) $p['slo_days'];
+        $done = $run = $pend = [];
+
+        // cabeçalho da etapa
+        if ($status === 'done') {
+            $done[] = 'Concluída' . ($p['date_end'] ? ' em ' . $e(Menu::date($p['date_end'])) : '') . ((int) $p['users_id_done'] ? ' por ' . $e(getUserName((int) $p['users_id_done'])) : '')
+                . ' · levou ' . Menu::days(max(self::elapsed($p), $p['date_start'] && $p['date_end'] ? strtotime((string) $p['date_end']) - strtotime((string) $p['date_start']) : 0)) . ' dia(s)' . ($slo ? " (SLO $slo)" : '') . ((int) $p['returns'] ? ' · ' . (int) $p['returns'] . ' devolução(ões)' : '');
+        } elseif ($status === 'active') {
+            $run[] = 'Em andamento há <b>' . Menu::days(self::elapsed($p)) . ' dia(s)</b>' . ($slo ? " de $slo de SLO" : '') . ' · responsável: ' . $e(self::area($p) ?: '—')
+                . ($late ? " · <b class='text-danger'>prazo estourado</b>" : (self::isWarn($p) ? " · <b class='text-warning'>perto do prazo</b>" : ''));
+        } elseif ($status === 'skipped') {
+            $pend[] = 'Etapa pulada.';
+        } else {
+            $before = array_filter($phases, fn ($x) => $x['position'] < $p['position'] && !in_array($x['status'], ['done', 'skipped'], true));
+            $first = $before ? reset($before) : null;
+            $pend[] = 'Ainda não começou' . ($first ? ': começa quando <b>' . $e(self::name($first['code'])) . '</b> for concluída' : '') . ' · responsável: ' . $e(self::area($p) ?: '—') . ($slo ? " · SLO $slo dia(s)" : '') . '.';
+        }
+
+        // o que está cadastrado nas abas ligadas à etapa: [rótulo, tipo, feitos, em execução, pendentes]
+        $metrics = match ($code) {
+            'briefing' => [],
+            'planejamento' => [['Marcos', 'marco', ['feito'], ['andamento'], ['a_fazer', 'bloqueado']]],
+            'compras' => [['Compras', 'compra', ['recebido', 'pago'], ['aprovacao', 'contrato', 'pedido', 'producao', 'negociacao', 'cotacao'], ['requisicao']]],
+            'producao' => [['Peças', 'peca', ['aprovada', 'publicada'], ['em_aprovacao'], ['rascunho']], ['Brindes', 'brinde', ['recebido', 'entregue'], ['arte', 'producao'], ['a_definir']],
+                ['Convidados', 'convidado', ['confirmado', 'presente'], [], ['convidado']]],
+            'prontidao' => [['Checklists', 'checklist', ['feito', 'na'], [], ['a_fazer']]],
+            'execucao' => [['Ocorrências', 'ocorrencia', ['resolvida'], ['aberta'], []], ['Convidados presentes', 'convidado', ['presente'], [], ['confirmado']]],
+            'encerramento' => [['Lançamentos', 'lancamento', ['conciliado'], ['realizado'], ['previsto', 'comprometido']], ['Resultados', 'resultado', ['atingido', 'parcial'], [], ['nao_atingido']]],
+            default => [],
+        };
+        global $DB;
+        foreach ($metrics as [$name, $kind, $okSt, $runSt, $pendSt]) {
+            $by = [];
+            foreach ($DB->request(['SELECT' => ['status'], 'FROM' => Registro::getTable(), 'WHERE' => ['plugin_gestaoeventos_eventos_id' => $id, 'kind' => $kind]]) as $r) {
+                $by[(string) $r['status']] = ($by[(string) $r['status']] ?? 0) + 1;
+            }
+            $sum = fn (array $l) => array_sum(array_intersect_key($by, array_flip($l)));
+            if ($n = $sum($okSt)) {
+                $done[] = "$name: <b>$n</b> concluído(s)";
+            }
+            if ($n = $sum($runSt)) {
+                $run[] = "$name: <b>$n</b> em andamento";
+            }
+            if ($n = $sum($pendSt)) {
+                $pend[] = "$name: <b>$n</b> a fazer";
+            }
+        }
+        if ($code === 'avaliacao' || $code === 'compras' || $code === 'planejamento') {
+            $ap = ['approved' => 0, 'pending' => 0];
+            foreach ($DB->request(['SELECT' => ['status'], 'FROM' => Aprovacao::getTable(), 'WHERE' => ['plugin_gestaoeventos_eventos_id' => $id]]) as $r) {
+                $ap[$r['status']] = ($ap[$r['status']] ?? 0) + 1;
+            }
+            if ($ap['approved']) {
+                $done[] = 'Aprovações: <b>' . $ap['approved'] . '</b> aprovada(s)';
+            }
+            if ($ap['pending']) {
+                $run[] = 'Aprovações: <b>' . $ap['pending'] . '</b> aguardando decisão';
+            }
+        }
+        if ($code === 'prontidao') {
+            $f = $ev->fields;
+            $done[] = $f['ready_gp_date'] ? 'Aceite do GP em ' . $e(Menu::date($f['ready_gp_date'])) : null;
+            $done[] = $f['ready_mkt_date'] ? 'Aceite do Marketing em ' . $e(Menu::date($f['ready_mkt_date'])) : null;
+            $done = array_values(array_filter($done));
+        }
+
+        // exigências que ainda faltam para concluir a etapa
+        if ($status !== 'done' && $status !== 'skipped') {
+            $miss = self::missing($ev, $p);
+            foreach (array_slice($miss, 0, 4) as $m) {
+                $pend[] = $m;
+            }
+            if (count($miss) > 4) {
+                $pend[] = '… e mais ' . (count($miss) - 4) . ' exigência(s)';
+            }
+            if (!$miss && $status === 'active') {
+                $pend[] = '<span class="text-success">Nada falta: a etapa já pode ser concluída.</span>';
+            }
+        }
+
+        $block = function (string $title, string $icon, string $cls, array $items) use ($e): string {
+            if (!$items) {
+                return '';
+            }
+            return "<div class='ge-pop-sec $cls'><div class='ge-pop-t'><i class='ti $icon me-1'></i>$title</div><ul>"
+                . implode('', array_map(fn ($i) => '<li>' . (str_contains((string) $i, '<') ? $i : $e($i)) . '</li>', $items)) . '</ul></div>';
+        };
+        return "<div class='ge-pop-head' style='--c:$color'><b>" . $e(self::name($code)) . "</b><span class='badge ge-badge' style='--c:$color'>" . $e($label) . '</span></div>'
+            . $block('Em execução', 'ti-player-play', 'run', $run)
+            . $block('Pendente', 'ti-hourglass', 'pend', $pend)
+            . $block('Concluído', 'ti-circle-check', 'done', $done);
+    }
+
     // ------------------------------------------------------------------ nomes
 
     public static function name(string $code): string

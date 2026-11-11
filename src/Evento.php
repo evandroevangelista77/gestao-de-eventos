@@ -522,7 +522,7 @@ class Evento extends CommonDBTM
         }
         echo "</div>";
         if (!$new) {
-            echo self::stepper($phases);
+            echo self::stepper($phases, $this);
         }
         echo "</div>";
 
@@ -538,9 +538,10 @@ class Evento extends CommonDBTM
         $money = fn ($name, $label, $col = 'col-md-3') => "<div class='$col'><label class='form-label'>$label</label><input class='form-control' name='$name' value='" . ((float) $f[$name] ? number_format((float) $f[$name], 2, ',', '.') : '') . "' $dis></div>";
         $area = fn ($name, $label, $col = 'col-md-6', $rows = 2) => "<div class='$col'><label class='form-label'>$label</label><textarea class='form-control' rows='$rows' name='$name' $dis>" . $e($f[$name]) . "</textarea></div>";
         $select = fn ($name, $label, $list, $col = 'col-md-3') => "<div class='$col'><label class='form-label'>$label</label>" . Dropdown::showFromArray($name, $list, ['value' => (string) $f[$name], 'display' => false, 'width' => '100%', 'disabled' => $dis !== '']) . "</div>";
-        $section = fn ($title, $icon, $phase = '') => "<div class='col-12 ge-section'><i class='ti $icon me-1'></i>$title" . ($phase ? " <span class='text-secondary fw-normal'>· etapa " . $e(Fase::name($phase)) . "</span>" : '') . "</div>";
+        $sectionColors = ['Identificação' => '#38bdf8', 'Objetivo' => '#f472b6', 'Data e local' => '#34d399', 'Necessidades' => '#fb923c', 'Orçamento e aprovação' => '#eab308', 'Projeto e documentos' => '#a78bfa'];
+        $section = fn ($title, $icon, $phase = '') => "<div class='col-12 ge-section' style='--sc:" . ($sectionColors[$title] ?? '#14b8a6') . "'><i class='ti $icon me-1'></i>$title" . ($phase ? " <span class='text-secondary fw-normal'>· etapa " . $e(Fase::name($phase)) . "</span>" : '') . "</div>";
 
-        echo "<form method='post' action='$action' class='card mb-3'><div class='card-header'><h3 class='card-title'><i class='ti ti-file-description me-2'></i>" . ($new ? 'Briefing de entrada' : 'Briefing e dados do evento') . "</h3>"
+        echo "<form method='post' action='$action' class='card mb-3'><div class='card-header ge-hd' style='--kc:#14b8a6'><h3 class='card-title'><i class='ti ti-file-description me-2'></i>" . ($new ? 'Briefing de entrada' : 'Briefing e dados do evento') . "</h3>"
             . "<div class='card-actions small text-secondary'>" . ($locked ? 'Somente leitura: o briefing foi enviado.' : '') . "</div></div><div class='card-body row g-3'>";
         echo $section('Identificação', 'ti-id', 'briefing');
         echo "<div class='col-md-6'><label class='form-label required'>Nome do evento</label><input class='form-control' name='name' maxlength='150' required placeholder='Ex.: Feira de Tecnologia 2026' value='" . $e($f['name']) . "' $dis></div>";
@@ -605,7 +606,7 @@ class Evento extends CommonDBTM
     }
 
     /** Linha das etapas: concluída, atual (atrasada em vermelho), a fazer ou pulada, com dias e SLO. */
-    private static function stepper(array $phases): string
+    private static function stepper(array $phases, ?self $ev = null): string
     {
         $e = [Menu::class, 'e'];
         $h = "<div class='ge-steps'>";
@@ -616,7 +617,7 @@ class Evento extends CommonDBTM
             $cls = $p['status'] . (($late && in_array($p['status'], ['active', 'done'], true)) || Fase::isWarn($p) ? ' late' : '');
             $days = in_array($p['status'], ['active', 'done'], true) || (int) $p['seconds'] ? Menu::days(Fase::elapsed($p)) . 'd' : '';
             $icon = match ($p['status']) { 'done' => 'ti-check', 'active' => 'ti-player-play', 'skipped' => 'ti-player-skip-forward', default => '' };
-            $h .= "<div class='ge-step $cls' title='" . $e(Fase::name($p['code']) . ' · ' . Fase::area($p) . ' · ' . (Fase::STATUSES[$p['status']][0] ?? '') . ($days ? " · $days" : '') . ((int) $p['slo_days'] ? ' (SLO ' . $p['slo_days'] . 'd)' : '') . ((int) $p['returns'] ? ' · ' . $p['returns'] . ' devolução(ões)' : '')) . "'>"
+            $h .= "<div class='ge-step $cls' tabindex='0'>" . ($ev ? "<div class='ge-pop-src' hidden>" . Fase::summary($ev, $p, $phases) . '</div>' : '')
                 . "<span class='ge-step-dot'>" . ($icon ? "<i class='ti $icon'></i>" : $i) . "</span><span class='ge-step-name'>" . $e(Fase::name($p['code'])) . "</span>"
                 . "<span class='ge-step-meta'>" . $e($days ?: Fase::area($p)) . ((int) $p['slo_days'] && $days ? ' / ' . (int) $p['slo_days'] . 'd' : '') . ((int) $p['returns'] ? " <i class='ti ti-arrow-back-up text-danger'></i>" . (int) $p['returns'] : '') . "</span></div>";
         }
@@ -633,7 +634,7 @@ class Evento extends CommonDBTM
             // rascunho: envio à triagem
             $missing = self::briefingMissing($f);
             $lead = self::leadInfo($f, date('Y-m-d', strtotime($_SESSION['glpi_currenttime'])));
-            echo "<div class='card mb-3 ge-current'><div class='card-header'><h3 class='card-title'><i class='ti ti-pencil me-2'></i>Rascunho</h3>"
+            echo "<div class='card mb-3 ge-current'><div class='card-header ge-hd' style='--kc:#3b82f6'><h3 class='card-title'><i class='ti ti-pencil me-2'></i>Rascunho</h3>"
                 . ($f['triage_status'] === 'devolvido' ? "<div class='card-actions small text-danger'>devolvido pela triagem</div>" : '') . "</div><div class='card-body'>";
             if ($f['triage_status'] === 'devolvido' && $f['triage_comment']) {
                 echo "<div class='alert alert-danger py-2'><b>Devolvido pelo Marketing:</b> " . $e($f['triage_comment']) . "</div>";
@@ -669,7 +670,7 @@ class Evento extends CommonDBTM
         $late = Fase::isLate($p);
         $warn = Fase::isWarn($p);
         $ticket = (int) $p['tickets_id'];
-        echo "<div class='card mb-3 ge-current" . ($late ? ' late' : '') . "'><div class='card-header'><h3 class='card-title'><i class='ti ti-player-play me-2'></i>Etapa atual: " . $e(Fase::name($p['code'])) . "</h3>"
+        echo "<div class='card mb-3 ge-current" . ($late ? ' late' : '') . "'><div class='card-header ge-hd' style='--kc:" . ($late ? '#ef4444' : '#3b82f6') . "'><h3 class='card-title'><i class='ti ti-player-play me-2'></i>Etapa atual: " . $e(Fase::name($p['code'])) . "</h3>"
             . "<div class='card-actions small text-secondary'>" . $e(Fase::area($p)) . ' · há ' . Menu::days(Fase::elapsed($p)) . ' dia(s)' . ((int) $p['slo_days'] ? ' · SLO ' . (int) $p['slo_days'] . ' dia(s)' : '')
             . ($late ? " · <b class='text-danger'>atrasada</b>" : ($warn ? " · <b class='text-warning'>perto do prazo</b>" : '')) . ($ticket ? " · <a href='" . $e(\Ticket::getFormURLWithID($ticket)) . "'>chamado #$ticket</a>" : '') . "</div></div><div class='card-body'>";
         echo "<p class='mb-2'>" . $e($etapa['description'] ?? '') . "</p>";

@@ -37,6 +37,12 @@ class Abas extends CommonGLPI
         'avisos'       => ['Avisos', 'ti ti-bell-ringing', ''],
     ];
 
+    /** chave => cor da aba (título da aba e cabeçalhos dos cartões dentro dela) */
+    public const COLORS = [
+        'aprovacoes' => '#a78bfa', 'planejamento' => '#38bdf8', 'checklists' => '#34d399', 'marketing' => '#f472b6', 'compras' => '#fb923c', 'financeiro' => '#eab308',
+        'viagens' => '#22d3ee', 'logistica' => '#84cc16', 'execucao' => '#60a5fa', 'encerramento' => '#f87171', 'historico' => '#94a3b8', 'avisos' => '#f59e0b',
+    ];
+
     /** etapa => abas onde se cumpre o que ela exige */
     private const GUIDE = [
         'briefing' => [], 'avaliacao' => ['aprovacoes', 'financeiro'], 'planejamento' => ['planejamento', 'financeiro', 'aprovacoes'], 'compras' => ['compras', 'aprovacoes', 'financeiro'],
@@ -65,7 +71,7 @@ class Abas extends CommonGLPI
                 continue;
             }
             [$label, $icon] = self::META[$key];
-            $titles[$num] = self::createTabEntry($label, $counts[$key], Evento::class, $icon);
+            $titles[$num] = "<span class='ge-t' style='--kc:" . self::COLORS[$key] . "'>" . self::createTabEntry($label, $counts[$key], Evento::class, $icon) . '</span>';
         }
         return $titles;
     }
@@ -85,6 +91,7 @@ class Abas extends CommonGLPI
         }
         $edit = $item->canEditData() && Acesso::canEdit($key);
         $back = Evento::tabUrl($item->getID(), $key);
+        echo "<div class='ge-k' style='--kc:" . self::COLORS[$key] . "'>";
         echo Dicas::strip($item, $key);
         switch ($key) {
             case 'aprovacoes':
@@ -124,7 +131,7 @@ class Abas extends CommonGLPI
                 Alerta::tab($item, $edit);
                 break;
         }
-        echo Menu::script('drawer.js') . Menu::script('gestaoeventos.js');
+        echo '</div>' . Menu::script('drawer.js') . Menu::script('gestaoeventos.js');
         return true;
     }
 

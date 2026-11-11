@@ -36,7 +36,7 @@ function plugin_init_gestaoeventos(): void
 
     \GlpiPlugin\Gestaoeventos\Acesso::sessionLoad();
 
-    $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['gestaoeventos'] = ['js/avisos.js'];
+    $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['gestaoeventos'] = ['js/avisos.js', 'js/etapas.js'];
     $PLUGIN_HOOKS[Hooks::ITEM_UPDATE]['gestaoeventos']    = ['ProjectTask' => 'plugin_gestaoeventos_projecttask_update'];
     $PLUGIN_HOOKS[Hooks::MENU_TOADD]['gestaoeventos']     = [Menu::SECTOR => [Evento::class]];
     $PLUGIN_HOOKS[Hooks::REDEFINE_MENUS]['gestaoeventos'] = 'plugin_gestaoeventos_redefine_menus';
