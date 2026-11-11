@@ -3,6 +3,8 @@
  * cronômetro ao vivo de cada etapa (tempo na etapa e tempo restante pelo SLO) e cores dos títulos.
  */
 (() => {
+    if (window.__geVivo) return;
+    window.__geVivo = true;
     const COLORS = {
         evento: '#2ee6c8', documentos: '#4d9bff', 'histórico': '#b0bec5', historico: '#b0bec5', todos: '#ffd400',
     };
@@ -91,10 +93,9 @@
             if (k) a.style.setProperty('--kc', MENU[k]);
         });
         // cabeçalhos de cartão das telas do plugin (painel, aprovações, relatórios…) sem cor própria
-        let i = 0;
         document.querySelectorAll('.ge .card-header').forEach((h) => {
             if (h.closest('.ge-k') || h.classList.contains('ge-hd') || h.dataset.gec) return;
-            h.dataset.gec = '1'; h.classList.add('ge-hd'); h.style.setProperty('--kc', PALETTE[i++ % PALETTE.length]);
+            h.dataset.gec = '1'; h.classList.add('ge-hd');
         });
     };
     paint();

@@ -522,7 +522,7 @@ class Evento extends CommonDBTM
         }
         echo "</div>";
         if (!$new) {
-            echo self::stepper($phases, $this);
+            echo self::stepper($phases, $this) . Menu::script('vivo.js');
         }
         echo "</div>";
 

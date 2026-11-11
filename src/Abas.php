@@ -162,7 +162,7 @@ class Abas extends CommonGLPI
                 Alerta::tab($item, $edit);
                 break;
         }
-        echo '</div>' . Menu::script('drawer.js') . Menu::script('gestaoeventos.js');
+        echo '</div>' . Menu::script('vivo.js') . Menu::script('drawer.js') . Menu::script('gestaoeventos.js');
         return true;
     }
 

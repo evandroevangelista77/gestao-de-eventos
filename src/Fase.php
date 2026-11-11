@@ -593,21 +593,31 @@ class Fase
      * Cronômetro ao vivo da etapa ativa: tempo na etapa e tempo que ainda resta pelo SLO. O JS (etapas.js)
      * atualiza a cada segundo a partir dos valores gravados aqui. $mode: panel | strip | mini.
      */
+    private static function dur(int $sec): string
+    {
+        $sec = max(0, $sec);
+        $d = intdiv($sec, 86400);
+        return ($d ? $d . 'd ' : '') . sprintf('%02dh %02dm %02ds', intdiv($sec % 86400, 3600), intdiv($sec % 3600, 60), $sec % 60);
+    }
+
     public static function timer(array $p, string $mode = 'panel'): string
     {
         if (($p['status'] ?? '') !== 'active') {
             return '';
         }
         $slo = (int) $p['slo_days'] * 86400;
-        $attr = "data-spent='" . self::elapsed($p) . "' data-slo='$slo' data-mode='$mode'";
+        $sp = self::elapsed($p);
+        $left = $slo - $sp;
+        $lt = $left < 0 ? 'Atrasada há' : 'Ainda restam';
+        $attr = "data-spent='$sp' data-slo='$slo' data-mode='$mode'" . ($slo && $left < 0 ? " data-late='1'" : '');
         if ($mode === 'mini') {
-            return "<span class='ge-timer ge-tm-mini' $attr><i class='ti ti-clock'></i> <span data-k='mini'></span></span>";
+            return "<span class='ge-timer ge-tm-mini' $attr><i class='ti ti-clock'></i> <span data-k='mini'>" . ($slo ? ($left < 0 ? 'atraso ' : 'resta ') : '') . self::dur($slo ? abs($left) : $sp) . "</span></span>";
         }
         if ($mode === 'strip') {
-            return "<div class='ge-timer ge-tm-strip' $attr><i class='ti ti-clock-play'></i> Na etapa há <b data-k='spent'></b>" . ($slo ? " · <span data-k='lefttxt'></span> <b data-k='left'></b>" : ' · sem prazo (SLO) definido') . '</div>';
+            return "<div class='ge-timer ge-tm-strip' $attr><i class='ti ti-clock-play'></i> Na etapa há <b data-k='spent'>" . self::dur($sp) . "</b>" . ($slo ? " · <span data-k='lefttxt'>$lt</span> <b data-k='left'>" . self::dur(abs($left)) . "</b>" : ' · sem prazo (SLO) definido') . '</div>';
         }
-        return "<div class='ge-timer ge-tm-panel' $attr><div class='ge-tm-box spent'><small><i class='ti ti-clock-play me-1'></i>Tempo na etapa</small><b data-k='spent'></b></div>"
-            . ($slo ? "<div class='ge-tm-box left'><small><i class='ti ti-hourglass-high me-1'></i><span data-k='lefttxt'></span> · SLO " . (int) $p['slo_days'] . " dia(s)</small><b data-k='left'></b></div>"
+        return "<div class='ge-timer ge-tm-panel' $attr><div class='ge-tm-box spent'><small><i class='ti ti-clock-play me-1'></i>Tempo na etapa</small><b data-k='spent'>" . self::dur($sp) . "</b></div>"
+            . ($slo ? "<div class='ge-tm-box left'><small><i class='ti ti-hourglass-high me-1'></i><span data-k='lefttxt'>$lt</span> · SLO " . (int) $p['slo_days'] . " dia(s)</small><b data-k='left'>" . self::dur(abs($left)) . "</b></div>"
                 . "<div class='ge-tm-bar'><i data-k='bar'></i></div><div class='ge-tm-pct small' data-k='pct'></div>"
                 : "<div class='ge-tm-box left'><small><i class='ti ti-hourglass-off me-1'></i>Prazo (SLO)</small><b>não definido</b></div>")
             . '</div>';

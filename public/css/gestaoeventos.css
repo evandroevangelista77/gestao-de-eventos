@@ -546,3 +546,19 @@
 .ge-pop-sec.run { --sc: #3b82f6; } .ge-pop-sec.pend { --sc: #f59e0b; } .ge-pop-sec.done { --sc: #22c55e; }
 .ge-pop-t { font-weight: 700; text-transform: uppercase; font-size: .68rem; letter-spacing: .05em; color: var(--sc); margin-bottom: .15rem; }
 .ge-pop-sec ul { margin: 0; padding-left: 1rem; } .ge-pop-sec li { margin: .1rem 0; }
+
+/* títulos padronizados: uma cor só (azul-claro), maiores, e com brilho ao passar o mouse */
+:root { --ge-title: #38bdf8; --ge-title-hi: #bae6fd; }
+.ge-hd, .ge-k .card-header { --kc: var(--ge-title) !important; }
+.ge-current.late .ge-hd { --kc: #ef4444 !important; }
+.ge-section { --sc: var(--ge-title) !important; font-size: 1.05rem; }
+.ge-section i { width: 2rem; height: 2rem; font-size: 1.25rem; }
+.ge-hd .card-title, .ge-k .card-header .card-title { font-size: 1.3rem; }
+.ge-hd .card-title i, .ge-k .card-header .card-title i { font-size: 1.45rem; vertical-align: -.12em; }
+.ge .ge-title h2 { color: var(--ge-title); font-size: 1.9rem; font-weight: 800; }
+.ge .ge-crumb { color: var(--ge-title); }
+.ge-hd .card-title, .ge-k .card-header .card-title, .ge-section, .ge .ge-title h2, .ge-section i { transition: color .2s, text-shadow .2s, box-shadow .2s; }
+.ge-hd:hover .card-title, .ge-k .card-header:hover .card-title, .ge-section:hover, .ge .ge-title h2:hover {
+    color: var(--ge-title-hi) !important; text-shadow: 0 0 6px var(--ge-title), 0 0 18px var(--ge-title), 0 0 34px color-mix(in srgb, var(--ge-title) 70%, transparent); }
+.ge-hd:hover .card-title i, .ge-k .card-header:hover .card-title i { color: var(--ge-title-hi); filter: drop-shadow(0 0 6px var(--ge-title)); }
+.ge-section:hover i { box-shadow: 0 0 14px var(--ge-title); }
