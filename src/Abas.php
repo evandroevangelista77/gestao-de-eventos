@@ -51,6 +51,35 @@ class Abas extends CommonGLPI
 
     // ------------------------------------------------------------------ abas do GLPI
 
+    /** Pop-up da aba: situação do evento e da etapa a que a aba pertence (ou um resumo, nas abas sem etapa). */
+    private static function tabPopover(Evento $ev, string $key, array $phases): string
+    {
+        $e = [Menu::class, 'e'];
+        $f = $ev->fields;
+        [$sLabel, $sColor] = Evento::STATUSES[(int) $f['status']] ?? ['', '#64748b'];
+        $active = null;
+        foreach ($phases as $p) {
+            if ($p['status'] === 'active') {
+                $active = $p;
+            }
+        }
+        $h = "<div class='ge-pop-ev'><span class='badge ge-badge' style='--c:$sColor'>Evento " . $e(mb_strtolower($sLabel)) . '</span>'
+            . ($active ? ' · etapa atual: <b>' . $e(Fase::name($active['code'])) . '</b>' : '') . '</div>';
+        $code = self::META[$key][2] ?? '';
+        if ($code && isset($phases[$code])) {
+            return $h . Fase::summary($ev, $phases[$code], $phases);
+        }
+        $id = $ev->getID();
+        $n = fn (string $kind, array $w = []) => Registro::countKind($id, $kind, $w);
+        $lines = match ($key) {
+            'checklists' => ['Checklists feitos: <b>' . $n('checklist', ['status' => ['feito', 'na']]) . '</b>', 'A fazer: <b>' . $n('checklist', ['status' => 'a_fazer']) . '</b>'],
+            'historico' => ['Tudo o que aconteceu no evento, em ordem.', 'Registros: <b>' . countElementsInTable('glpi_plugin_gestaoeventos_historicos', ['plugin_gestaoeventos_eventos_id' => $id]) . '</b>'],
+            'avisos' => ['Alertas e lembretes do evento.'],
+            default => [],
+        };
+        return $h . "<div class='ge-pop-sec run'><div class='ge-pop-t'><i class='ti ti-info-circle me-1'></i>Esta aba</div><ul>" . implode('', array_map(fn ($l) => "<li>$l</li>", $lines)) . '</ul></div>';
+    }
+
     public function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
     {
         if (!$item instanceof Evento || $item->isNewItem()) {
@@ -66,12 +95,14 @@ class Abas extends CommonGLPI
             'logistica' => $n('material') + $n('reserva'), 'execucao' => $n('ocorrencia', ['status' => 'aberta']), 'encerramento' => 0, 'historico' => 0, 'avisos' => 0,
         ];
         $titles = [];
+        $phases = Fase::forEvento($id);
         foreach (self::TABS as $num => $key) {
             if (!Acesso::canView($key)) {
                 continue;
             }
             [$label, $icon] = self::META[$key];
-            $titles[$num] = "<span class='ge-t' style='--kc:" . self::COLORS[$key] . "'>" . self::createTabEntry($label, $counts[$key], Evento::class, $icon) . '</span>';
+            $titles[$num] = "<span class='ge-t' style='--kc:" . self::COLORS[$key] . "'><span class='ge-pop-src' hidden>" . self::tabPopover($item, $key, $phases) . '</span>'
+                . self::createTabEntry($label, $counts[$key], Evento::class, $icon) . '</span>';
         }
         return $titles;
     }
@@ -174,6 +205,7 @@ class Abas extends CommonGLPI
         $h = "<div class='ge-banner" . ($late ? ' late' : '') . "' style='--c:$color'><div class='ge-banner-top'><span class='ge-banner-num'>$num</span><div class='me-auto'><b>Etapa " . $e(Fase::name($code)) . "</b>"
             . "<div class='small text-secondary'>" . $e(Fase::area($p)) . ($slo ? " · SLO $slo dia(s)" : '') . ($p['status'] === 'active' ? ' · há ' . Menu::days($secs) . ' dia(s)' : ($secs ? ' · levou ' . Menu::days($secs) . ' dia(s)' : '')) . "</div></div>"
             . "<span class='badge ge-badge' style='--c:$color'>" . $e($label) . ($warn ? ' · perto do prazo' : '') . "</span></div>";
+        $h .= Fase::timer($p, 'strip');
         if ($slo && $p['status'] === 'active') {
             $h .= "<div class='ge-dr-bar" . ($late ? ' bad' : '') . "'><i style='width:$pct%'></i></div>";
         }
@@ -392,7 +424,7 @@ class Abas extends CommonGLPI
                     }
                     $DB->update(Registro::getTable(), ['extra' => json_encode($clean), 'date_mod' => $now], ['id' => (int) $id]);
                 }
-                $version = 1 + countElementsInTable(Historico::getTable(), ['plugin_gestaoeventos_eventos_id' => $ev->getID(), 'comment' => ['LIKE', 'RACI revisada%']]);
+                $version = 1 + countElementsInTable('glpi_plugin_gestaoeventos_historicos', ['plugin_gestaoeventos_eventos_id' => $ev->getID(), 'comment' => ['LIKE', 'RACI revisada%']]);
                 Historico::record($ev->getID(), 'planejamento', 'change', 'RACI revisada (versão ' . ($version + 1) . ') por ' . getUserName((int) Session::getLoginUserID()) . '.');
                 return 'RACI salva.';
         }

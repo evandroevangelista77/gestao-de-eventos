@@ -587,6 +587,32 @@ class Fase
         }
     }
 
+    // ------------------------------------------------------------------ cronômetro da etapa
+
+    /**
+     * Cronômetro ao vivo da etapa ativa: tempo na etapa e tempo que ainda resta pelo SLO. O JS (etapas.js)
+     * atualiza a cada segundo a partir dos valores gravados aqui. $mode: panel | strip | mini.
+     */
+    public static function timer(array $p, string $mode = 'panel'): string
+    {
+        if (($p['status'] ?? '') !== 'active') {
+            return '';
+        }
+        $slo = (int) $p['slo_days'] * 86400;
+        $attr = "data-spent='" . self::elapsed($p) . "' data-slo='$slo' data-mode='$mode'";
+        if ($mode === 'mini') {
+            return "<span class='ge-timer ge-tm-mini' $attr><i class='ti ti-clock'></i> <span data-k='mini'></span></span>";
+        }
+        if ($mode === 'strip') {
+            return "<div class='ge-timer ge-tm-strip' $attr><i class='ti ti-clock-play'></i> Na etapa há <b data-k='spent'></b>" . ($slo ? " · <span data-k='lefttxt'></span> <b data-k='left'></b>" : ' · sem prazo (SLO) definido') . '</div>';
+        }
+        return "<div class='ge-timer ge-tm-panel' $attr><div class='ge-tm-box spent'><small><i class='ti ti-clock-play me-1'></i>Tempo na etapa</small><b data-k='spent'></b></div>"
+            . ($slo ? "<div class='ge-tm-box left'><small><i class='ti ti-hourglass-high me-1'></i><span data-k='lefttxt'></span> · SLO " . (int) $p['slo_days'] . " dia(s)</small><b data-k='left'></b></div>"
+                . "<div class='ge-tm-bar'><i data-k='bar'></i></div><div class='ge-tm-pct small' data-k='pct'></div>"
+                : "<div class='ge-tm-box left'><small><i class='ti ti-hourglass-off me-1'></i>Prazo (SLO)</small><b>não definido</b></div>")
+            . '</div>';
+    }
+
     // ------------------------------------------------------------------ resumo da etapa (pop-up ao passar o mouse)
 
     /**

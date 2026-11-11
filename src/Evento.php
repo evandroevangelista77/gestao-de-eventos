@@ -619,7 +619,7 @@ class Evento extends CommonDBTM
             $icon = match ($p['status']) { 'done' => 'ti-check', 'active' => 'ti-player-play', 'skipped' => 'ti-player-skip-forward', default => '' };
             $h .= "<div class='ge-step $cls' tabindex='0'>" . ($ev ? "<div class='ge-pop-src' hidden>" . Fase::summary($ev, $p, $phases) . '</div>' : '')
                 . "<span class='ge-step-dot'>" . ($icon ? "<i class='ti $icon'></i>" : $i) . "</span><span class='ge-step-name'>" . $e(Fase::name($p['code'])) . "</span>"
-                . "<span class='ge-step-meta'>" . $e($days ?: Fase::area($p)) . ((int) $p['slo_days'] && $days ? ' / ' . (int) $p['slo_days'] . 'd' : '') . ((int) $p['returns'] ? " <i class='ti ti-arrow-back-up text-danger'></i>" . (int) $p['returns'] : '') . "</span></div>";
+                . "<span class='ge-step-meta'>" . ($p['status'] === 'active' ? Fase::timer($p, 'mini') . ' ' : '') . $e($days ?: Fase::area($p)) . ((int) $p['slo_days'] && $days ? ' / ' . (int) $p['slo_days'] . 'd' : '') . ((int) $p['returns'] ? " <i class='ti ti-arrow-back-up text-danger'></i>" . (int) $p['returns'] : '') . "</span></div>";
         }
         return $h . "</div>";
     }
@@ -673,6 +673,7 @@ class Evento extends CommonDBTM
         echo "<div class='card mb-3 ge-current" . ($late ? ' late' : '') . "'><div class='card-header ge-hd' style='--kc:" . ($late ? '#ef4444' : '#3b82f6') . "'><h3 class='card-title'><i class='ti ti-player-play me-2'></i>Etapa atual: " . $e(Fase::name($p['code'])) . "</h3>"
             . "<div class='card-actions small text-secondary'>" . $e(Fase::area($p)) . ' · há ' . Menu::days(Fase::elapsed($p)) . ' dia(s)' . ((int) $p['slo_days'] ? ' · SLO ' . (int) $p['slo_days'] . ' dia(s)' : '')
             . ($late ? " · <b class='text-danger'>atrasada</b>" : ($warn ? " · <b class='text-warning'>perto do prazo</b>" : '')) . ($ticket ? " · <a href='" . $e(\Ticket::getFormURLWithID($ticket)) . "'>chamado #$ticket</a>" : '') . "</div></div><div class='card-body'>";
+        echo Fase::timer($p, 'panel');
         echo "<p class='mb-2'>" . $e($etapa['description'] ?? '') . "</p>";
         echo Abas::phaseGuide($this, $p);
         if ($missing) {
