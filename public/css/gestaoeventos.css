@@ -562,3 +562,46 @@
     color: var(--ge-title-hi) !important; text-shadow: 0 0 6px var(--ge-title), 0 0 18px var(--ge-title), 0 0 34px color-mix(in srgb, var(--ge-title) 70%, transparent); }
 .ge-hd:hover .card-title i, .ge-k .card-header:hover .card-title i { color: var(--ge-title-hi); filter: drop-shadow(0 0 6px var(--ge-title)); }
 .ge-section:hover i { box-shadow: 0 0 14px var(--ge-title); }
+
+/* Tabela principal (padrão das listas), igual à do Gestão de Demandas */
+/* filtros e listas (mesmo padrão da lista de demandas do Marketing) */
+.gl-filters { display: flex; flex-wrap: wrap; gap: .6rem; align-items: flex-end; }
+.gl-filters > div { min-width: 140px; }
+.gl-filters label.lbl { font-size: .75rem; margin-bottom: .15rem; font-weight: 600; color: var(--tblr-secondary, #667085); display: block; }
+
+/* ---------- Tabela principal (estilo monday), igual à do Marketing ---------- */
+.gl-table-main { display: grid; gap: 1.7rem; overflow-x: auto; padding-bottom: .5rem; }
+.gl-grp { --g: #3b82f6; min-width: 980px; }
+.gl-grp-head { display: grid; grid-template-columns: var(--gl-cols); align-items: end; margin-bottom: .35rem; }
+.gl-col-names { display: contents; }
+.gl-col-names span { text-align: center; font-size: .78rem; font-weight: 600; color: var(--tblr-body-color); padding: 0 .25rem .2rem; }
+.gl-grp-title { background: none; border: 0; padding: 0; color: var(--g); font-size: 1.3rem; font-weight: 600; display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; text-align: left; }
+.gl-grp-title i { font-size: 1.1rem; transition: transform .2s; }
+.gl-grp-title em { font-style: normal; font-size: .78rem; font-weight: 700; color: var(--tblr-secondary, #667085); border: 1px solid var(--tblr-border-color, #d8e0ea); border-radius: 999px; padding: .02rem .55rem; }
+.gl-grp.closed .gl-grp-title i { transform: rotate(-90deg); }
+.gl-grp.closed .gl-grp-body { display: none; }
+.gl-row { display: grid; grid-template-columns: var(--gl-cols); gap: 3px; margin-bottom: 4px; align-items: stretch; }
+.gl-row > div { background: var(--tblr-bg-surface-secondary, #f1f5f9); display: flex; align-items: center; justify-content: center; min-height: 52px; min-width: 0; }
+.gl-row > .gl-cell-name { justify-content: flex-start; flex-direction: column; align-items: flex-start; gap: .05rem; padding: .35rem .9rem; border-left: 4px solid var(--g); border-radius: 6px 0 0 6px; }
+.gl-row > div:last-child { border-radius: 0 6px 6px 0; }
+.gl-cell-name a { font-weight: 600; color: var(--tblr-body-color); text-decoration: none; overflow-wrap: anywhere; line-height: 1.25; }
+.gl-cell-name a:hover { color: var(--tblr-primary, #206bc4); text-decoration: underline; }
+.gl-cell-name small { font-size: .7rem; color: var(--tblr-secondary, #667085); }
+.gl-row:hover > div { filter: brightness(1.04); }
+.gl-row[data-drawer] { cursor: pointer; }
+.gl-av { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; color: #fff; background: hsl(var(--h, 215) 52% 42%); box-shadow: 0 0 0 2px var(--tblr-bg-surface, #fff); }
+.gl-av.none { background: transparent; border: 1.5px dashed var(--tblr-secondary, #94a3b8); color: var(--tblr-secondary, #94a3b8); box-shadow: none; }
+.gl-row > .gl-cell-st { padding: 0; }
+.gl-st { width: 100%; height: 100%; min-height: 52px; background-color: var(--c, #94a3b8); color: #fff; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; padding: 0 .4rem; font-size: .88rem; text-shadow: 0 1px 1px rgba(0, 0, 0, .25); }
+.gl-row > .gl-cell-tl { padding: 0 1rem; }
+.gl-tl { width: 100%; height: 12px; border-radius: 6px; background: color-mix(in srgb, currentColor 16%, transparent); overflow: hidden; }
+.gl-tl span { display: block; height: 100%; background: var(--g); border-radius: 6px; transition: width .4s; }
+.gl-cell-dl { font-size: .88rem; font-weight: 600; }
+.gl-cell-dl.late { color: #ef4444; }
+.gl-cell-val { font-size: .9rem; font-weight: 600; }
+.gl-cell-pr-wrap { font-size: 1.05rem; }
+.gl-row > .gl-cell-st { padding: 0; }
+.gl-ge-note { font-size: .8rem; }
+
+.ge-list-title { font-size: 1.3rem; font-weight: 800; color: var(--ge-title, #38bdf8); margin: 0 0 .7rem; }
+.ge-list-title em { font-style: normal; font-size: .78rem; font-weight: 700; color: var(--tblr-secondary-color); border: 1px solid var(--tblr-border-color); border-radius: 999px; padding: .02rem .55rem; margin-left: .4rem; }

@@ -6,11 +6,11 @@ use GlpiPlugin\Gestaoeventos\Menu;
 Session::checkRight(Evento::$rightname, READ);
 
 Menu::header('Eventos', 'evento');
-echo "<div class='ge'>" . Menu::title('Eventos', 'evento', Menu::button('Calendário', Menu::url('/front/calendario.php'), 'ti-calendar', 'btn-outline-secondary') . Menu::button('Painel', Menu::url('/front/painel.php'), 'ti-chart-dots-3', 'btn-outline-secondary')
-    . (Evento::canCreate() ? Menu::button('Novo evento', Evento::getFormURL()) : '')) . "</div>";
-if (GlpiPlugin\Gestaoeventos\Acesso::restricted()) {
-    GlpiPlugin\Gestaoeventos\Acesso::restrictedList();
-} else {
+if (!empty($_GET['native']) && !GlpiPlugin\Gestaoeventos\Acesso::restricted()) {
+    // busca avançada nativa do GLPI (colunas, critérios e exportação)
+    echo "<div class='ge'>" . Menu::title('Eventos', 'evento', Menu::button('Voltar à lista', Menu::url('/front/evento.php'), 'ti-list', 'btn-outline-secondary')) . "</div>";
     Search::show(Evento::class);
+} else {
+    GlpiPlugin\Gestaoeventos\Lista::eventos();
 }
 Html::footer();

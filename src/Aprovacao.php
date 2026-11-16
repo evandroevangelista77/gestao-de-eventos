@@ -438,23 +438,31 @@ class Aprovacao
         echo $mine ? '' : "<div class='text-secondary small'>Nada esperando a sua decisão.</div>";
         echo "</div></div>";
 
-        echo "<div class='row g-3'><div class='col-xl-6'><div class='card h-100'><div class='card-header'><h3 class='card-title'><i class='ti ti-list-details me-2'></i>Fila por alçada</h3><div class='card-actions small text-secondary'>" . count($queue) . "</div></div>";
-        echo "<div class='table-responsive'><table class='table table-sm card-table table-vcenter'><thead><tr><th>Evento</th><th>Aprovação</th><th>Alçada</th><th>Prazo</th></tr></thead><tbody>";
+        // fila por alçada e últimas decisões: Tabela principal (padrão das listas)
+        $buckets = [];
         foreach ($queue as [$r, $ev]) {
-            echo "<tr><td><a href='" . $e(Evento::getFormURLWithID($ev->getID())) . "'><b>" . $e($ev->fields['code']) . "</b></a> <span class='small text-secondary'>" . $e(mb_strimwidth((string) $ev->fields['name'], 0, 32, '…')) . "</span></td>"
-                . "<td class='small'>" . $e(self::KINDS[$r['kind']] ?? '') . ((float) $r['amount'] > 0 ? '<br>' . Menu::money((float) $r['amount']) : '') . "</td><td class='small'>" . $e($r['label']) . "</td>"
-                . "<td class='small" . (self::isOverdue($r) ? ' text-danger fw-bold' : '') . "'>" . Menu::date($r['date_due'], true) . "</td></tr>";
+            $g = Lista::monthGroup($r['date_due']);
+            $buckets[$g[0]] ??= ['title' => $g[1], 'color' => $g[2], 'rows' => []];
+            $apr = (int) $r['users_id_approver'] ? getUserName((int) $r['users_id_approver']) : '';
+            $buckets[$g[0]]['rows'][] = ['name' => $ev->fields['code'] . ' · ' . $ev->fields['name'], 'sub' => (self::KINDS[$r['kind']] ?? '') . ($r['title'] ? ' — ' . mb_strimwidth((string) $r['title'], 0, 60, '…') : ''),
+                'url' => Evento::getFormURLWithID($ev->getID()), 'late' => self::isOverdue($r),
+                'cells' => [[Lista::avatar($apr, $apr ? 'Aprovador: ' . $apr : 'Qualquer membro da alçada'), 'gl-cell-av'], [Lista::stCell((string) $r['label'] ?: 'Alçada', '#f59e0b'), 'gl-cell-st'],
+                    [(float) $r['amount'] > 0 ? $e(Menu::money((float) $r['amount'])) : '—', 'gl-cell-val'], [$e(Lista::shortDate($r['date_due'])), 'gl-cell-dl' . (self::isOverdue($r) ? ' late' : '')]]];
         }
-        echo $queue ? '' : "<tr><td colspan='4' class='text-secondary small'>Fila vazia.</td></tr>";
-        echo "</tbody></table></div></div></div>";
+        echo "<div class='mb-4'><h3 class='ge-list-title'><i class='ti ti-list-details me-2'></i>Fila por alçada <em>" . count($queue) . "</em></h3>"
+            . Lista::mainTable([['Aprovador', '90px'], ['Alçada', '170px'], ['Valor', '130px'], ['Prazo', '110px']], Lista::groups($buckets), 'Fila vazia.') . '</div>';
 
-        echo "<div class='col-xl-6'><div class='card h-100'><div class='card-header'><h3 class='card-title'><i class='ti ti-history me-2'></i>Últimas decisões</h3></div>";
-        echo "<div class='table-responsive'><table class='table table-sm card-table table-vcenter'><thead><tr><th>Evento</th><th>Aprovação</th><th>Decisão</th><th>Quem</th></tr></thead><tbody>";
+        $buckets = [];
         foreach ($history as [$r, $ev]) {
-            echo "<tr><td><a href='" . $e(Evento::getFormURLWithID($ev->getID())) . "'><b>" . $e($ev->fields['code']) . "</b></a></td><td class='small'>" . $e(self::KINDS[$r['kind']] ?? '') . "<div class='text-secondary'>" . $e(mb_strimwidth((string) $r['title'], 0, 40, '…')) . "</div></td>"
-                . "<td>" . self::badge($r['status']) . "</td><td class='small'>" . $e(getUserName((int) $r['users_id_decided'])) . "<br>" . Menu::date($r['date_decision'], true) . "</td></tr>";
+            $g = Lista::monthGroup($r['date_decision']);
+            $buckets[$g[0]] ??= ['title' => $g[1], 'color' => $g[2], 'rows' => []];
+            [$sl, $sc] = self::STATUSES[$r['status']] ?? [$r['status'], '#64748b'];
+            $who = getUserName((int) $r['users_id_decided']);
+            $buckets[$g[0]]['rows'][] = ['name' => $ev->fields['code'] . ' · ' . $ev->fields['name'], 'sub' => (self::KINDS[$r['kind']] ?? '') . ($r['title'] ? ' — ' . mb_strimwidth((string) $r['title'], 0, 60, '…') : ''),
+                'url' => Evento::getFormURLWithID($ev->getID()),
+                'cells' => [[Lista::avatar($who, 'Decidido por ' . $who), 'gl-cell-av'], [Lista::stCell($sl, $sc), 'gl-cell-st'], [(float) $r['amount'] > 0 ? $e(Menu::money((float) $r['amount'])) : '—', 'gl-cell-val'], [$e(Lista::shortDate($r['date_decision'])), 'gl-cell-dl']]];
         }
-        echo $history ? '' : "<tr><td colspan='4' class='text-secondary small'>Nenhuma decisão registrada.</td></tr>";
-        echo "</tbody></table></div></div></div></div></div>";
+        echo "<div class='mb-3'><h3 class='ge-list-title'><i class='ti ti-history me-2'></i>Últimas decisões <em>" . count($history) . "</em></h3>"
+            . Lista::mainTable([['Quem', '90px'], ['Decisão', '170px'], ['Valor', '130px'], ['Data', '110px']], Lista::groups($buckets), 'Nenhuma decisão registrada.') . '</div></div>' . Menu::script('vivo.js');
     }
 }

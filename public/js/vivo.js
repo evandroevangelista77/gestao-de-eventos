@@ -46,6 +46,15 @@
     document.addEventListener('scroll', hide, true);
     document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') hide(); });
 
+    // ---------------------------------------------------------------- grupos recolhíveis da Tabela principal
+    document.addEventListener('click', (ev) => {
+        const b = ev.target.closest && ev.target.closest('.gl-grp-title[data-toggle]');
+        if (!b) return;
+        const grp = b.closest('.gl-grp');
+        const closed = grp.classList.toggle('closed');
+        b.setAttribute('aria-expanded', closed ? 'false' : 'true');
+    });
+
     // ---------------------------------------------------------------- cronômetro
     const t0 = Date.now();
     const p2 = (n) => String(n).padStart(2, '0');
