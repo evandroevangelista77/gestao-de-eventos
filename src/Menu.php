@@ -32,7 +32,7 @@ class Menu
             'evento'     => ['title' => 'Eventos', 'page' => self::page('/front/evento.php'), 'icon' => 'ti ti-calendar-event'],
             'calendario' => ['title' => 'Calendário', 'page' => self::page('/front/calendario.php'), 'icon' => 'ti ti-calendar'],
             'painel'     => ['title' => 'Painel de Eventos', 'page' => self::page('/front/painel.php'), 'icon' => 'ti ti-chart-dots-3'],
-            'aprovacoes' => ['title' => 'Aprovações', 'page' => self::page('/front/aprovacoes.php'), 'icon' => 'ti ti-checklist'],
+            'aprovacoes' => ['title' => 'Meu Painel', 'page' => self::page('/front/aprovacoes.php'), 'icon' => 'ti ti-checklist'],
             'relatorios' => ['title' => 'Relatórios', 'page' => self::page('/front/relatorios.php'), 'icon' => 'ti ti-report-analytics'],
             'documentos' => ['title' => 'Documentos', 'page' => self::page('/front/documentos.php'), 'icon' => 'ti ti-files'],
         ];

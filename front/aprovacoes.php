@@ -9,6 +9,6 @@ if (!GlpiPlugin\Gestaoeventos\Acesso::canView('aprovacoes')) {
     Html::displayRightError();
 }
 
-Menu::header('Aprovações', 'aprovacoes');
+Menu::header('Meu Painel', 'aprovacoes');
 Aprovacao::page();
 Html::footer();

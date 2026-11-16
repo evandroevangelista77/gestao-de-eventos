@@ -430,7 +430,7 @@ class Aprovacao
             }
         }
         $back = Menu::url('/front/aprovacoes.php');
-        echo "<div class='ge'>" . Menu::title('Aprovações', 'aprovacoes', Menu::button('Eventos', Evento::getSearchURL(), 'ti-list', 'btn-outline-secondary'));
+        echo "<div class='ge'>" . Menu::title('Meu Painel', 'aprovacoes', Menu::button('Eventos', Evento::getSearchURL(), 'ti-list', 'btn-outline-secondary'));
         echo "<div class='card mb-3'><div class='card-header'><h3 class='card-title'><i class='ti ti-user-check me-2'></i>Minhas pendências</h3><div class='card-actions small text-secondary'>" . count($mine) . "</div></div><div class='card-body'>";
         foreach ($mine as [$r, $ev]) {
             echo "<div class='small mb-1'><a href='" . $e(Evento::getFormURLWithID($ev->getID())) . "'><b>" . $e($ev->fields['code']) . "</b> · " . $e($ev->fields['name']) . "</a></div>" . self::decisionCard($r, $ev, Evento::getFormURL(), $back);
